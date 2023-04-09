@@ -15,7 +15,7 @@ public sealed class FolderItemDisplay
     /// <param name="modified"></param>
     /// <param name="displayType"></param>
     /// <exception cref="ArgumentOutOfRangeException"></exception>
-    public FolderItemDisplay(string name, string fullPath, string size, string created, string modified, string displayType)
+    public FolderItemDisplay(string name, string fullPath, long? size, DateTime? created, DateTime? modified, string displayType)
     {
         Name = name;
         FullPath = fullPath;
@@ -38,19 +38,19 @@ public sealed class FolderItemDisplay
     public string FullPath { get; }
 
     /// <summary>
-    /// Size of the file.
+    /// Size of the item, in bytes.
     /// </summary>
-    public string Size { get; }
+    public long? Size { get; }
 
     /// <summary>
     /// Date and time the file or folder was created.
     /// </summary>
-    public string Created { get; }
+    public DateTime? Created { get; }
 
     /// <summary>
     /// Date and time the file or folder was last modified.
     /// </summary>
-    public string Modified { get; }
+    public DateTime? Modified { get; }
 
     /// <summary>
     /// Type of the file or folder. Valid values are "arrow-up", "file", and "folder".
