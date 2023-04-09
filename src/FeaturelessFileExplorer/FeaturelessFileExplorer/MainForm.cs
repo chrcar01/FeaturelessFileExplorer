@@ -5,7 +5,7 @@ namespace FeaturelessFileExplorer;
 
 public partial class MainForm : Form
 {
-    private List<FolderItemDisplay> _items;
+    private List<FolderItemDisplay> _items = new();
 
     public MainForm()
     {
@@ -24,22 +24,31 @@ public partial class MainForm : Form
         imageList.Images.Add("file", new Icon(Path.Combine(Environment.CurrentDirectory, "file.ico")));
     }
 
-    private void LoadFilesAndFolders(string folderPath)
+    private async Task LoadFilesAndFolders(string folderPath)
     {
         try
         {
-            _items = GetFilesAndFolders(folderPath);
+            this.Cursor = Cursors.WaitCursor;
+
+            var items = new List<FolderItemDisplay>();
+            await Task.Run(() => items = GetFilesAndFolders(folderPath));
+            _items = items;
             lvFilesAndFolders.BeginUpdate();
             lvFilesAndFolders.VirtualListSize = _items.Count;
             lvFilesAndFolders.Refresh();
             lvFilesAndFolders.EndUpdate();
+            txtFolder.Text = folderPath;
         }
         catch (Exception ex)
         {
-            MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            MessageBox.Show(ex.Message, @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+        finally
+        {
+            this.Cursor = Cursors.Default;
         }
     }
-    
+
     private List<FolderItemDisplay> GetFilesAndFolders(string folderPath)
     {
         var filesAndFolders = new List<FolderItemDisplay>();
@@ -74,13 +83,15 @@ public partial class MainForm : Form
         return filesAndFolders;
     }
 
-    private void txtFolder_KeyDown(object sender, KeyEventArgs e)
+    private async void txtFolder_KeyDown(object sender, KeyEventArgs e)
     {
-        if (e.KeyCode == Keys.Enter)
-        {
-            LoadFilesAndFolders(txtFolder.Text);
-            e.Handled = true;
-        }
+        if (e.KeyCode != Keys.Enter) return;
+        
+        // Turn off the 'Ding' sound when Enter pressed in TextBox
+        // https://stackoverflow.com/a/31347256/1594171
+        e.SuppressKeyPress = true;
+
+        await LoadFilesAndFolders(txtFolder.Text);
     }
 
     private void lvFilesAndFolders_RetrieveVirtualItem(object sender, RetrieveVirtualItemEventArgs e)
@@ -93,7 +104,7 @@ public partial class MainForm : Form
         };
     }
 
-    private void lvFilesAndFolders_DoubleClick(object sender, EventArgs e)
+    private async void lvFilesAndFolders_DoubleClick(object sender, EventArgs e)
     {
         if (lvFilesAndFolders.SelectedIndices.Count == 0) return;
 
@@ -109,24 +120,12 @@ public partial class MainForm : Form
                 Process.Start(processStartInfo);
                 break;
             case "folder":
-                txtFolder.Text = fid.FullPath;
-                LoadFilesAndFolders(fid.FullPath);
+                await LoadFilesAndFolders(fid.FullPath);
                 break;
             case "arrow-up":
                 var parentFullName = new DirectoryInfo(fid.FullPath).Parent?.FullName;
-                txtFolder.Text = parentFullName;
-                if (parentFullName != null) LoadFilesAndFolders(parentFullName);
+                if (parentFullName != null) await LoadFilesAndFolders(parentFullName);
                 break;
         }
     }
 }
-
-
-public record FolderItemDisplay(
-    string Name,
-    string FullPath,
-    string Size,
-    string Created,
-    string Modified,
-    string DisplayType
-);
