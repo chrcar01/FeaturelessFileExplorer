@@ -34,7 +34,7 @@ public partial class MainForm : Form
         try
         {
             this.Cursor = Cursors.WaitCursor;
-
+            folderPath = folderPath.Trim();
             var items = new List<FolderItemDisplay>();
             await Task.Run(() => items = GetFilesAndFolders(folderPath));
             _items = items;
@@ -56,6 +56,7 @@ public partial class MainForm : Form
 
     private List<FolderItemDisplay> GetFilesAndFolders(string folderPath)
     {
+        folderPath = $@"{folderPath}";
         var filesAndFolders = new List<FolderItemDisplay>();
         var folderInfo = new DirectoryInfo(folderPath);
 
@@ -64,25 +65,30 @@ public partial class MainForm : Form
             filesAndFolders.Add(new("(Parent)", folderPath, null, null, null, Constants.DISPLAY_TYPE_PARENT_FOLDER));
         };
 
-        filesAndFolders.AddRange(Directory
-            .EnumerateDirectories(folderPath)
-            .Select(d => new DirectoryInfo(d))
-            .Select(di => new FolderItemDisplay(
-                di.Name,
-                di.FullName,
-                null,
-                di.CreationTime,
-                di.LastWriteTime, Constants.DISPLAY_TYPE_FOLDER)));
 
-        filesAndFolders.AddRange(Directory
-            .EnumerateFiles(folderPath)
-            .Select(f => new FileInfo(f))
-            .Select(fi => new FolderItemDisplay(
-                fi.Name,
-                fi.FullName,
-                fi.Length,
-                fi.CreationTime,
-                fi.LastWriteTime, Constants.DISPLAY_TYPE_FILE)));
+        foreach (var d in Directory.EnumerateDirectories(folderPath))
+        {
+            var di = new DirectoryInfo(d);
+            filesAndFolders.Add(
+                new(di.Name,
+                    d,
+                    null,
+                    di.CreationTime,
+                    di.LastAccessTime,
+                    Constants.DISPLAY_TYPE_FOLDER));
+        }
+
+        foreach (var f in Directory.EnumerateFiles(folderPath))
+        {
+            var fi = new FileInfo(f);
+            filesAndFolders.Add(
+                new(fi.Name, 
+                    f,
+                    fi.Length,
+                    fi.CreationTime,
+                    fi.LastAccessTime,
+                    Constants.DISPLAY_TYPE_FILE));
+        }
 
         return filesAndFolders;
     }
@@ -212,10 +218,10 @@ public partial class MainForm : Form
         if (e.Button != MouseButtons.Right) return;
 
         if (lvFilesAndFolders.GetItemAt(e.X, e.Y) is not { } lvi) return;
-        
+
         var fid = (FolderItemDisplay)lvi.Tag;
         if (fid.DisplayType != Constants.DISPLAY_TYPE_FILE) return;
-        
+
 
         var cms = new ContextMenuStrip();
         cms.Items.Add("Open", null, (s, ea) =>
@@ -263,7 +269,7 @@ public partial class MainForm : Form
         {
             Clipboard.SetText(fid.FullPath);
         });
-                
+
         cms.Show(lvFilesAndFolders, e.Location);
     }
 }
