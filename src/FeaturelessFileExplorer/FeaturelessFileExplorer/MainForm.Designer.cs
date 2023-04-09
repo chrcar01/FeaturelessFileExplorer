@@ -34,6 +34,7 @@
             lblFolder = new Label();
             txtFolder = new TextBox();
             lvFilesAndFolders = new ListView();
+            contextMenu = new ContextMenuStrip(components);
             imageList = new ImageList(components);
             tableLayoutPanel1.SuspendLayout();
             panel1.SuspendLayout();
@@ -84,6 +85,7 @@
             // 
             // lvFilesAndFolders
             // 
+            lvFilesAndFolders.ContextMenuStrip = contextMenu;
             lvFilesAndFolders.Dock = DockStyle.Fill;
             lvFilesAndFolders.Location = new Point(8, 47);
             lvFilesAndFolders.Margin = new Padding(8, 7, 8, 7);
@@ -97,6 +99,12 @@
             lvFilesAndFolders.ColumnClick += lvFilesAndFolders_ColumnClick;
             lvFilesAndFolders.RetrieveVirtualItem += lvFilesAndFolders_RetrieveVirtualItem;
             lvFilesAndFolders.DoubleClick += lvFilesAndFolders_DoubleClick;
+            lvFilesAndFolders.MouseDown += lvFilesAndFolders_MouseDown;
+            // 
+            // contextMenu
+            // 
+            contextMenu.Name = "contextMenuStrip1";
+            contextMenu.Size = new Size(61, 4);
             // 
             // imageList
             // 
@@ -126,5 +134,6 @@
         private Label lblFolder;
         private ListView lvFilesAndFolders;
         private ImageList imageList;
+        private ContextMenuStrip contextMenu;
     }
 }

@@ -7,7 +7,7 @@ public partial class MainForm : Form
 {
     private List<FolderItemDisplay> _items = new();
 
-    
+
 
     public MainForm()
     {
@@ -205,5 +205,65 @@ public partial class MainForm : Form
         lvFilesAndFolders.Refresh();
         lvFilesAndFolders.EndUpdate();
 
+    }
+
+    private void lvFilesAndFolders_MouseDown(object sender, MouseEventArgs e)
+    {
+        if (e.Button != MouseButtons.Right) return;
+
+        if (lvFilesAndFolders.GetItemAt(e.X, e.Y) is not { } lvi) return;
+        
+        var fid = (FolderItemDisplay)lvi.Tag;
+        if (fid.DisplayType != Constants.DISPLAY_TYPE_FILE) return;
+        
+
+        var cms = new ContextMenuStrip();
+        cms.Items.Add("Open", null, (s, ea) =>
+        {
+            var processStartInfo = new ProcessStartInfo
+            {
+                UseShellExecute = true,
+                FileName = fid.FullPath
+            };
+            Process.Start(processStartInfo);
+        });
+
+        async void CopyLocalEventHandler(object s, EventArgs ea)
+        {
+            try
+            {
+                Cursor.Current = Cursors.WaitCursor;
+                var sourceFile = fid.FullPath;
+                var fileInfo = new FileInfo(fid.FullPath);
+                var destinationFile = Path.Combine(KnownFolders.Downloads, fileInfo.Name);
+                if (File.Exists(destinationFile))
+                {
+                    var result = MessageBox.Show($@"File {fileInfo.Name} already exists in Downloads folder. Overwrite?", @"Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                    if (result == DialogResult.No) return;
+                }
+
+                await using var sourceStream = new FileStream(sourceFile, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, FileOptions.Asynchronous | FileOptions.SequentialScan);
+                await using var destinationStream = new FileStream(destinationFile, FileMode.Create, FileAccess.Write, FileShare.None, 4096, FileOptions.Asynchronous | FileOptions.SequentialScan);
+                await sourceStream.CopyToAsync(destinationStream);
+                MessageBox.Show(@"File copied to Downloads folder", @"Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                Cursor.Current = Cursors.Default;
+            }
+        }
+
+        cms.Items.Add("Copy Local", null, CopyLocalEventHandler!);
+
+        cms.Items.Add("Copy Path", null, (s, ea) =>
+        {
+            Clipboard.SetText(fid.FullPath);
+        });
+                
+        cms.Show(lvFilesAndFolders, e.Location);
     }
 }
