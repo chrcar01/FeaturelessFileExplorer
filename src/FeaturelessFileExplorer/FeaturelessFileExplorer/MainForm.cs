@@ -149,6 +149,8 @@ public partial class MainForm : Form
 
     private void lvFilesAndFolders_ColumnClick(object sender, ColumnClickEventArgs e)
     {
+        if (!_items.Any()) return;
+
         var folders = _items.Where(x => x.DisplayType == Constants.DISPLAY_TYPE_FOLDER);
         var files = _items.Where(x => x.DisplayType == Constants.DISPLAY_TYPE_FILE);
         var direction = SortDirection == "asc" ? "desc" : "asc";
