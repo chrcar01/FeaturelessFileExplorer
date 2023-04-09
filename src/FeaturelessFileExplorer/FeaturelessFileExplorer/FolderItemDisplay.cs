@@ -22,7 +22,7 @@ public sealed class FolderItemDisplay
         Size = size;
         Created = created;
         Modified = modified;
-        var validDisplayTypes = new[] { "parent-folder", "file", "folder" };
+        var validDisplayTypes = new[] { Constants.DISPLAY_TYPE_FILE, Constants.DISPLAY_TYPE_FOLDER, Constants.DISPLAY_TYPE_PARENT_FOLDER };
         if (!validDisplayTypes.Contains(displayType)) throw new ArgumentOutOfRangeException($@"Invalid display type: {displayType}", nameof(displayType));
         DisplayType = displayType;
     }

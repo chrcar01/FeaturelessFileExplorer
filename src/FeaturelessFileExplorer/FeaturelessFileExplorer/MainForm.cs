@@ -7,9 +7,7 @@ public partial class MainForm : Form
 {
     private List<FolderItemDisplay> _items = new();
 
-    private const string DISPLAY_TYPE_PARENT_FOLDER = "parent-folder";
-    private const string DISPLAY_TYPE_FOLDER = "folder";
-    private const string DISPLAY_TYPE_FILE = "file";
+    
 
     public MainForm()
     {
@@ -25,7 +23,7 @@ public partial class MainForm : Form
         lvFilesAndFolders.Columns.Add("Size", 200);
         lvFilesAndFolders.Columns.Add("Created", 200);
         lvFilesAndFolders.Columns.Add("Modified", 200);
-        foreach (var displayType in new[] { DISPLAY_TYPE_FILE, DISPLAY_TYPE_FOLDER, DISPLAY_TYPE_PARENT_FOLDER })
+        foreach (var displayType in new[] { Constants.DISPLAY_TYPE_FILE, Constants.DISPLAY_TYPE_FOLDER, Constants.DISPLAY_TYPE_PARENT_FOLDER })
         {
             imageList.Images.Add(displayType, new Icon(Path.Combine(Environment.CurrentDirectory, $"{displayType}.ico")));
         }
@@ -63,7 +61,7 @@ public partial class MainForm : Form
 
         if (folderInfo.Parent is not null)
         {
-            filesAndFolders.Add(new("(Parent)", folderPath, null, null, null, DISPLAY_TYPE_PARENT_FOLDER));
+            filesAndFolders.Add(new("(Parent)", folderPath, null, null, null, Constants.DISPLAY_TYPE_PARENT_FOLDER));
         };
 
         filesAndFolders.AddRange(Directory
@@ -74,8 +72,7 @@ public partial class MainForm : Form
                 di.FullName,
                 null,
                 di.CreationTime,
-                di.LastWriteTime,
-                DISPLAY_TYPE_FOLDER)));
+                di.LastWriteTime, Constants.DISPLAY_TYPE_FOLDER)));
 
         filesAndFolders.AddRange(Directory
             .EnumerateFiles(folderPath)
@@ -85,8 +82,7 @@ public partial class MainForm : Form
                 fi.FullName,
                 fi.Length,
                 fi.CreationTime,
-                fi.LastWriteTime,
-                DISPLAY_TYPE_FILE)));
+                fi.LastWriteTime, Constants.DISPLAY_TYPE_FILE)));
 
         return filesAndFolders;
     }
@@ -125,7 +121,7 @@ public partial class MainForm : Form
         var fid = _items[lvFilesAndFolders.SelectedIndices[0]];
         switch (fid.DisplayType)
         {
-            case DISPLAY_TYPE_FILE:
+            case Constants.DISPLAY_TYPE_FILE:
                 var processStartInfo = new ProcessStartInfo
                 {
                     UseShellExecute = true,
@@ -134,11 +130,11 @@ public partial class MainForm : Form
                 Process.Start(processStartInfo);
                 break;
 
-            case DISPLAY_TYPE_FOLDER:
+            case Constants.DISPLAY_TYPE_FOLDER:
                 await LoadFilesAndFolders(fid.FullPath);
                 break;
 
-            case DISPLAY_TYPE_PARENT_FOLDER:
+            case Constants.DISPLAY_TYPE_PARENT_FOLDER:
                 var parentFullName = new DirectoryInfo(fid.FullPath).Parent?.FullName;
                 if (parentFullName != null) await LoadFilesAndFolders(parentFullName);
                 break;
@@ -147,8 +143,8 @@ public partial class MainForm : Form
 
     private void lvFilesAndFolders_ColumnClick(object sender, ColumnClickEventArgs e)
     {
-        var folders = _items.Where(x => x.DisplayType == DISPLAY_TYPE_FOLDER);
-        var files = _items.Where(x => x.DisplayType == DISPLAY_TYPE_FILE);
+        var folders = _items.Where(x => x.DisplayType == Constants.DISPLAY_TYPE_FOLDER);
+        var files = _items.Where(x => x.DisplayType == Constants.DISPLAY_TYPE_FILE);
         var direction = SortDirection == "asc" ? "desc" : "asc";
         SortDirection = direction;
         switch (e.Column)
@@ -170,7 +166,7 @@ public partial class MainForm : Form
                 files = SortDirection == "asc" ? files.OrderBy(x => x.Modified) : files.OrderByDescending(x => x.Modified);
                 break;
         }
-        var parentFolderItem = _items.FirstOrDefault(x => x.DisplayType == DISPLAY_TYPE_PARENT_FOLDER);
+        var parentFolderItem = _items.FirstOrDefault(x => x.DisplayType == Constants.DISPLAY_TYPE_PARENT_FOLDER);
         _items = new List<FolderItemDisplay>();
         if (parentFolderItem != null) _items.Add(parentFolderItem);
         if (SortDirection == "asc")
