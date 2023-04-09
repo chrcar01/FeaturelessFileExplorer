@@ -6,7 +6,11 @@ namespace FeaturelessFileExplorer;
 public partial class MainForm : Form
 {
     private List<FolderItemDisplay> _items = new();
-    
+
+    private const string DISPLAY_TYPE_PARENT_FOLDER = "parent-folder";
+    private const string DISPLAY_TYPE_FOLDER = "folder";
+    private const string DISPLAY_TYPE_FILE = "file";
+
     public MainForm()
     {
         InitializeComponent();
@@ -21,9 +25,10 @@ public partial class MainForm : Form
         lvFilesAndFolders.Columns.Add("Size", 200);
         lvFilesAndFolders.Columns.Add("Created", 200);
         lvFilesAndFolders.Columns.Add("Modified", 200);
-        imageList.Images.Add("arrow-up", new Icon(Path.Combine(Environment.CurrentDirectory, "arrow-up.ico")));
-        imageList.Images.Add("folder", new Icon(Path.Combine(Environment.CurrentDirectory, "folder.ico")));
-        imageList.Images.Add("file", new Icon(Path.Combine(Environment.CurrentDirectory, "file.ico")));
+        foreach (var displayType in new[] { DISPLAY_TYPE_FILE, DISPLAY_TYPE_FOLDER, DISPLAY_TYPE_PARENT_FOLDER })
+        {
+            imageList.Images.Add(displayType, new Icon(Path.Combine(Environment.CurrentDirectory, $"{displayType}.ico")));
+        }
     }
 
     private async Task LoadFilesAndFolders(string folderPath)
@@ -51,17 +56,14 @@ public partial class MainForm : Form
         }
     }
 
-    private FolderItemDisplay ArrowUpFolderItemDisplay(string folderPath) => 
-        new("(Parent)", folderPath, null, null, null, "arrow-up");
-
     private List<FolderItemDisplay> GetFilesAndFolders(string folderPath)
     {
         var filesAndFolders = new List<FolderItemDisplay>();
         var folderInfo = new DirectoryInfo(folderPath);
-        
+
         if (folderInfo.Parent is not null)
         {
-            filesAndFolders.Add(ArrowUpFolderItemDisplay(folderPath));
+            filesAndFolders.Add(new("(Parent)", folderPath, null, null, null, DISPLAY_TYPE_PARENT_FOLDER));
         };
 
         filesAndFolders.AddRange(Directory
@@ -73,7 +75,7 @@ public partial class MainForm : Form
                 null,
                 di.CreationTime,
                 di.LastWriteTime,
-                "folder")));
+                DISPLAY_TYPE_FOLDER)));
 
         filesAndFolders.AddRange(Directory
             .EnumerateFiles(folderPath)
@@ -84,7 +86,7 @@ public partial class MainForm : Form
                 fi.Length,
                 fi.CreationTime,
                 fi.LastWriteTime,
-                "file")));
+                DISPLAY_TYPE_FILE)));
 
         return filesAndFolders;
     }
@@ -105,9 +107,9 @@ public partial class MainForm : Form
         var fid = _items[e.ItemIndex];
         e.Item = new ListViewItem(new[]
         {
-            fid.Name, 
-            fid.Size.HasValue ? fid.Size.ToString() : string.Empty, 
-            fid.Created.HasValue ? fid.Created.Value.ToString(CultureInfo.InvariantCulture) : string.Empty, 
+            fid.Name,
+            fid.Size.HasValue ? fid.Size.ToString() : string.Empty,
+            fid.Created.HasValue ? fid.Created.Value.ToString(CultureInfo.InvariantCulture) : string.Empty,
             fid.Modified.HasValue ? fid.Modified.Value.ToString(CultureInfo.InvariantCulture) : string.Empty
         })
         {
@@ -123,7 +125,7 @@ public partial class MainForm : Form
         var fid = _items[lvFilesAndFolders.SelectedIndices[0]];
         switch (fid.DisplayType)
         {
-            case "file":
+            case DISPLAY_TYPE_FILE:
                 var processStartInfo = new ProcessStartInfo
                 {
                     UseShellExecute = true,
@@ -131,10 +133,12 @@ public partial class MainForm : Form
                 };
                 Process.Start(processStartInfo);
                 break;
-            case "folder":
+
+            case DISPLAY_TYPE_FOLDER:
                 await LoadFilesAndFolders(fid.FullPath);
                 break;
-            case "arrow-up":
+
+            case DISPLAY_TYPE_PARENT_FOLDER:
                 var parentFullName = new DirectoryInfo(fid.FullPath).Parent?.FullName;
                 if (parentFullName != null) await LoadFilesAndFolders(parentFullName);
                 break;
@@ -143,8 +147,8 @@ public partial class MainForm : Form
 
     private void lvFilesAndFolders_ColumnClick(object sender, ColumnClickEventArgs e)
     {
-        var folders = _items.Where(x => x.DisplayType == "folder");
-        var files = _items.Where(x => x.DisplayType == "file");
+        var folders = _items.Where(x => x.DisplayType == DISPLAY_TYPE_FOLDER);
+        var files = _items.Where(x => x.DisplayType == DISPLAY_TYPE_FILE);
         var direction = SortDirection == "asc" ? "desc" : "asc";
         SortDirection = direction;
         switch (e.Column)
@@ -166,9 +170,9 @@ public partial class MainForm : Form
                 files = SortDirection == "asc" ? files.OrderBy(x => x.Modified) : files.OrderByDescending(x => x.Modified);
                 break;
         }
-        var arrowUp = _items.FirstOrDefault(x => x.DisplayType == "arrow-up");
+        var parentFolderItem = _items.FirstOrDefault(x => x.DisplayType == DISPLAY_TYPE_PARENT_FOLDER);
         _items = new List<FolderItemDisplay>();
-        if (arrowUp != null) _items.Add(arrowUp);
+        if (parentFolderItem != null) _items.Add(parentFolderItem);
         if (SortDirection == "asc")
         {
             _items.AddRange(folders);
@@ -179,9 +183,9 @@ public partial class MainForm : Form
             _items.AddRange(files);
             _items.AddRange(folders);
         }
-        
-        
-        
+
+
+
         lvFilesAndFolders.BeginUpdate();
 
         // adding a glyph to indicate sorting is not as simple as it should be...
@@ -204,6 +208,6 @@ public partial class MainForm : Form
         lvFilesAndFolders.VirtualListSize = _items.Count;
         lvFilesAndFolders.Refresh();
         lvFilesAndFolders.EndUpdate();
-        
+
     }
 }
