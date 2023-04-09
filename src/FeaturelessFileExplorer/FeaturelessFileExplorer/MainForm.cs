@@ -243,7 +243,13 @@ public partial class MainForm : Form
                 Cursor.Current = Cursors.WaitCursor;
                 var sourceFile = fid.FullPath;
                 var fileInfo = new FileInfo(fid.FullPath);
-                var destinationFile = Path.Combine(KnownFolders.Downloads, fileInfo.Name);
+                var downloadsDir = Path.Combine(Environment.CurrentDirectory, "downloads");
+                if (!Directory.Exists(downloadsDir))
+                {
+                    Directory.CreateDirectory(downloadsDir);
+                }
+
+                var destinationFile = Path.Combine(downloadsDir, fileInfo.Name);
                 if (File.Exists(destinationFile))
                 {
                     var result = MessageBox.Show($@"File {fileInfo.Name} already exists in Downloads folder. Overwrite?", @"Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
@@ -253,7 +259,7 @@ public partial class MainForm : Form
                 await using var sourceStream = new FileStream(sourceFile, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, FileOptions.Asynchronous | FileOptions.SequentialScan);
                 await using var destinationStream = new FileStream(destinationFile, FileMode.Create, FileAccess.Write, FileShare.None, 4096, FileOptions.Asynchronous | FileOptions.SequentialScan);
                 await sourceStream.CopyToAsync(destinationStream);
-                MessageBox.Show(@"File copied to Downloads folder", @"Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show($@"File copied to {destinationFile}", @"Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
