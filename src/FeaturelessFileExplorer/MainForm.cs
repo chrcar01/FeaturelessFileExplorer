@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Globalization;
+using System.Reflection;
 
 namespace FeaturelessFileExplorer;
 
@@ -25,10 +26,17 @@ public partial class MainForm : Form
         lvFilesAndFolders.Columns.Add("Modified", 200);
         foreach (var displayType in new[] { Constants.DISPLAY_TYPE_FILE, Constants.DISPLAY_TYPE_FOLDER, Constants.DISPLAY_TYPE_PARENT_FOLDER })
         {
-            imageList.Images.Add(displayType, new Icon(Path.Combine(Environment.CurrentDirectory, $"{displayType}.ico")));
+            imageList.Images.Add(displayType, new Icon(ReadEmbeddedIcon($"{displayType}.ico")));
         }
     }
 
+    private static Stream ReadEmbeddedIcon(string fileName)
+    {
+        var assembly = Assembly.GetExecutingAssembly();
+        var resourcePath = $"FeaturelessFileExplorer.icons.{fileName}";
+        return assembly.GetManifestResourceStream(resourcePath)
+            ?? throw new InvalidOperationException($"Could not find embedded resource: {resourcePath}");
+    }
     private async Task LoadFilesAndFolders(string folderPath)
     {
         try
