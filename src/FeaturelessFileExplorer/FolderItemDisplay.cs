@@ -8,12 +8,12 @@ public sealed class FolderItemDisplay
     /// <summary>
     /// Creates a new instance of <see cref="FolderItemDisplay"/> for a folder.
     /// </summary>
-    /// <param name="name"></param>
-    /// <param name="fullPath"></param>
-    /// <param name="size"></param>
-    /// <param name="created"></param>
-    /// <param name="modified"></param>
-    /// <param name="displayType"></param>
+    /// <param name="name">Name of the file or folder.  This is what's displayed in the ListView.</param>
+    /// <param name="fullPath">Absolute path to the file or folder.</param>
+    /// <param name="size">Size of the file in kilobytes.</param>
+    /// <param name="created"><see cref="DateTime"/> the item was created.</param>
+    /// <param name="modified"><see cref="DateTime"/> the item was last modified.</param>
+    /// <param name="displayType">Type of the file or folder. Valid values are "parent-folder", "file", and "folder".</param>
     /// <exception cref="ArgumentOutOfRangeException"></exception>
     public FolderItemDisplay(string name, string fullPath, long? size, DateTime? created, DateTime? modified, string displayType)
     {
@@ -53,7 +53,7 @@ public sealed class FolderItemDisplay
     public DateTime? Modified { get; }
 
     /// <summary>
-    /// Type of the file or folder. Valid values are "arrow-up", "file", and "folder".
+    /// Type of the file or folder. Valid values are "parent-folder", "file", and "folder".
     /// </summary>
     public string DisplayType { get; }
 

@@ -1,13 +1,7 @@
 # FeaturelessFileExplorer
 Barebones file explorer for Windows with as few features as possible to keep it simple.  
+
 ![Featureless File Explorer](assets/file-explorer.png)
-## Why
-
-My company uses a separate privileged account to access internal resources that is different than the account used to login in to our [Windows] laptops.  
-
-A need popped up to be able to open Windows Explorer to a location where that privileged account was granted access but the one used to login to Windows was not.  Getting Windows Explorer to open as a different user was not working.  Trying to get approval from the security group to use 3rd party alternatives to Windows Explorer was time consuming.  
-
-**So the Featureless File Explorer was born** as a tool where the source code is out in the wild, can be quickly and easily scanned for evil, and does NOT use any 3rd party components.
 
 ## Getting Started
 1. Currently this is built against .NET 6, so make sure [that SDK](https://dotnet.microsoft.com/en-us/download/dotnet/6.0) is installed.  
