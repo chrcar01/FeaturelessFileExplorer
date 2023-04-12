@@ -4,12 +4,12 @@ Barebones file explorer for Windows with as few features as possible to keep it 
 ![Featureless File Explorer](assets/file-explorer.png)
 
 ## Getting Started
-1. Currently this is built against .NET 6, so make sure [that SDK](https://dotnet.microsoft.com/en-us/download/dotnet/6.0) is installed.  
-2. Clone this repo
-3. Run the application in one of two ways:
-    1. In a command window running under the desired user account, CD to **src\FeaturelessFileExplorer** and then run `dotnet run`
-    2. Open the solution with Visual Studio as the desired user, press F5 to start debugging the application
-4. Type in the directory path and hit enter to view the files and folders in that directory
+
+Easiest way is to download the latest release, unzip it, and run FeaturelessFileExplorer.exe.
+
+Or clone this repo and run the source code in one of the following two ways:
+1. In a command window running under the desired user account, CD to **src\FeaturelessFileExplorer** and then run `dotnet run`
+2. Open the solution with Visual Studio as the desired user, press F5 to start debugging the application
 
 ## Included Features
 * List files and folders in any directory either locally or via UNC path
