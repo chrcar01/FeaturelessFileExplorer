@@ -6,6 +6,11 @@
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
+    <Title>Barebones file explorer for Windows with as few features as possible to keep it simple.</Title>
+    <Company>Chris Carter</Company>
+    <Description>Barebones file explorer for Windows with as few features as possible to keep it simple.</Description>
+    <RepositoryUrl>https://github.com/chrcar01/FeaturelessFileExplorer</RepositoryUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,6 +29,13 @@
     <EmbeddedResource Include="icons\parent-folder.ico">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>
